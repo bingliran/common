@@ -11,12 +11,22 @@ public class MultiServerMailProperties {
     @NestedConfigurationProperty
     private MailProperties[] mail;
 
+    private boolean enable;
+
     public MailProperties[] getMail() {
         return mail;
     }
 
     public void setMail(MailProperties[] mail) {
         this.mail = mail;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 
     @Override

@@ -58,6 +58,12 @@ public class SqlWrapperUtil {
         return Wrapper.INSTANCE.selectOne(modelClass, sqlWhereFunction);
     }
 
+    public static int insert(List<Object> list) {
+        if (list == null || list.isEmpty())
+            return 0;
+        return insert(list.toArray());
+    }
+
     public static int insert(Class<?> modelClass, Object... models) {
         if (models.length == 0)
             return 0;

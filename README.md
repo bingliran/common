@@ -1,5 +1,7 @@
 # common
-Common Toolkit
+Common Toolkit  
+如果没有使用DataSource  
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 > 
         <dependency>
             <groupId>com.blr19c</groupId>
