@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -568,6 +569,13 @@ public class PictogramMap {
      */
     public int getPageSize() {
         return getIntValue("pageSize");
+    }
+
+    /**
+     * 默认使用PageHelper分页
+     */
+    public PictogramMap startPage() {
+        return startPage(PageHelper::startPage);
     }
 
     /**

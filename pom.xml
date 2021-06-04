@@ -37,7 +37,7 @@
 
     <groupId>com.blr19c</groupId>
     <artifactId>common</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>common</name>
     <description>common tools</description>
     <properties>
@@ -46,6 +46,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <apache.maven.version>3.8.1</apache.maven.version>
+        <spring.mybatis.version>2.2.0</spring.mybatis.version>
+        <mybatis.plus.version>3.4.3</mybatis.plus.version>
+        <mybatis.pagehelper.version>1.3.0</mybatis.pagehelper.version>
         <jackson.version>2.12.3</jackson.version>
         <shedlock.version>4.23.0</shedlock.version>
         <poi.version>4.1.2</poi.version>
@@ -76,6 +79,21 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${spring.mybatis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis.plus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>${mybatis.pagehelper.version}</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

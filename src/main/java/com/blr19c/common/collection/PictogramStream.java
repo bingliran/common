@@ -9,7 +9,8 @@ import java.util.stream.*;
 
 /**
  * 除了原本的流之外还提供了一些便捷方法
- * 2021.5.25 blr
+ *
+ * @author blr
  */
 @SuppressWarnings("unused")
 public class PictogramStream<T> extends OriginalStream<T> {

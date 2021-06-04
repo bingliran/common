@@ -1,3 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.blr19c.common.wxCp.config.WxCpAutoConfig\
 com.blr19c.common.mail.config.MailAutoConfig\
-com.blr19c.common.scheduled.ScheduledAutoConfig
+com.blr19c.common.scheduled.ScheduledAutoConfig\
+com.blr19c.common.spring.SpringAutoConfig
