@@ -135,7 +135,7 @@ public class EditableScheduledAnnotationBeanPostProcessor implements Instantiati
                         } else {
                             timeZone = TimeZone.getDefault();
                         }
-                        ScheduledTaskUtil.addTask(workId, runnable, new CronTrigger(cron, timeZone));
+                        ScheduledTaskUtils.addTask(workId, runnable, new CronTrigger(cron, timeZone));
                     }
                 }
             }
@@ -150,7 +150,7 @@ public class EditableScheduledAnnotationBeanPostProcessor implements Instantiati
             if (fixedDelay >= 0) {
                 Assert.isTrue(!processedSchedule, errorMessage);
                 processedSchedule = true;
-                ScheduledTaskUtil.addTask(workId, runnable, getPeriodicTrigger(fixedDelay, initialDelay, false));
+                ScheduledTaskUtils.addTask(workId, runnable, getPeriodicTrigger(fixedDelay, initialDelay, false));
             }
             String fixedDelayString = scheduled.fixedDelayString();
             if (StringUtils.hasText(fixedDelayString)) {
@@ -166,7 +166,7 @@ public class EditableScheduledAnnotationBeanPostProcessor implements Instantiati
                         throw new IllegalArgumentException(
                                 "Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
                     }
-                    ScheduledTaskUtil.addTask(workId, runnable, getPeriodicTrigger(fixedDelay, initialDelay, false));
+                    ScheduledTaskUtils.addTask(workId, runnable, getPeriodicTrigger(fixedDelay, initialDelay, false));
                 }
             }
 
@@ -175,7 +175,7 @@ public class EditableScheduledAnnotationBeanPostProcessor implements Instantiati
             if (fixedRate >= 0) {
                 Assert.isTrue(!processedSchedule, errorMessage);
                 processedSchedule = true;
-                ScheduledTaskUtil.addTask(workId, runnable, getPeriodicTrigger(fixedRate, initialDelay, true));
+                ScheduledTaskUtils.addTask(workId, runnable, getPeriodicTrigger(fixedRate, initialDelay, true));
             }
             String fixedRateString = scheduled.fixedRateString();
             if (StringUtils.hasText(fixedRateString)) {
@@ -191,7 +191,7 @@ public class EditableScheduledAnnotationBeanPostProcessor implements Instantiati
                         throw new IllegalArgumentException(
                                 "Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
                     }
-                    ScheduledTaskUtil.addTask(workId, runnable, getPeriodicTrigger(fixedRate, initialDelay, true));
+                    ScheduledTaskUtils.addTask(workId, runnable, getPeriodicTrigger(fixedRate, initialDelay, true));
                 }
             }
 

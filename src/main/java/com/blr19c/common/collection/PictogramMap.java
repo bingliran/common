@@ -9,6 +9,7 @@ import com.github.pagehelper.PageHelper;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jooq.lambda.Unchecked;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +20,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Clob;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
@@ -99,6 +99,13 @@ public class PictogramMap {
      */
     public static PictogramMap getInstance() {
         return getInstance(false);
+    }
+
+    /**
+     * 获取一个带有key和value的非同步PictogramMap实例
+     */
+    public static PictogramMap getInstance(Object key, Object value) {
+        return getInstance().putValue(key, value);
     }
 
     /**
@@ -250,6 +257,53 @@ public class PictogramMap {
         for (Object key : keys) {
             if (!predicate.test(getObject(key)))
                 throw new IllegalArgumentException(errorMessage);
+        }
+        return this;
+    }
+
+    /**
+     * 是否包含指定key
+     */
+    public boolean containsKey(Object key) {
+        return getMap().containsKey(key);
+    }
+
+    /**
+     * 是否包含指定value
+     */
+    public boolean containsValue(Object value) {
+        return getMap().containsValue(value);
+    }
+
+    /**
+     * map size
+     */
+    public int size() {
+        return getMap().size();
+    }
+
+    /**
+     * 替换指定key的value
+     */
+    public PictogramMap replace(Object key, Object value) {
+        getMap().replace(key, value);
+        return this;
+    }
+
+    /**
+     * 指定key的value为oldValue时替换key的value为newValue
+     */
+    public PictogramMap replace(Object key, Object oldValue, Object newValue) {
+        getMap().replace(key, oldValue, newValue);
+        return this;
+    }
+
+    /**
+     * 根据 valueFunction替换value
+     */
+    public <V> PictogramMap replace(Function<V, Object> valueFunction) {
+        for (Map.Entry<Object, Object> e : this.entrySet()) {
+            e.setValue(valueFunction.apply((V) e.getValue()));
         }
         return this;
     }
@@ -593,18 +647,7 @@ public class PictogramMap {
      * 将所有的clobValue转为string
      */
     public PictogramMap clobValueToString() {
-        try {
-            for (Map.Entry<Object, Object> e : entrySet()) {
-                if (e.getValue() instanceof Clob) {
-                    Clob value = (Clob) e.getValue();
-                    e.setValue(IOUtils.toString(value.getCharacterStream()));
-                    value.free();
-                }
-            }
-        } catch (SQLException | IOException e) {
-            throw new IllegalArgumentException(e);
-        }
-        return this;
+        return replace(Unchecked.function(o -> o instanceof Clob ? IOUtils.toString(((Clob) o).getCharacterStream()) : o));
     }
 
     /**

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.blr19c.common.io.WebFluxUtil.*;
+import static com.blr19c.common.io.WebFluxUtils.*;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
@@ -26,7 +26,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
  * @author blr
  */
 @SuppressWarnings(value = "unused")
-public class WxCpUtil {
+public class WxCpUtils {
 
     /**
      * 发送给所有人
@@ -36,7 +36,7 @@ public class WxCpUtil {
     private static WxCp wxCp;
 
     public static void setWxCp(WxCp wxCp) {
-        WxCpUtil.wxCp = wxCp;
+        WxCpUtils.wxCp = wxCp;
     }
 
     /**
@@ -63,7 +63,7 @@ public class WxCpUtil {
      */
     public static ResponseStyle send(RequestStyle requestStyle) {
         return toResponseStyle(
-                postLaunch(getSendUrl(), requestStyle.getRequest(wxCp).getMap(), HashMap.class, WxCpUtil::toError)
+                postLaunch(getSendUrl(), requestStyle.getRequest(wxCp).getMap(), HashMap.class, WxCpUtils::toError)
         );
     }
 

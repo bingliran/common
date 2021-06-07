@@ -17,7 +17,7 @@ import java.net.InetAddress;
  *
  * @author blr
  */
-public class IPUtil {
+public class IPUtils {
 
     public static String getIp(HttpServletRequest request) {
         Assert.notNull(request, "request not be null");

@@ -18,12 +18,12 @@ import java.util.Map;
  * @author blr
  * @see ListableBeanFactory
  */
-public class SpringBeanUtil implements ApplicationContextAware {
+public class SpringBeanUtils implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
-        SpringBeanUtil.applicationContext = applicationContext;
+        SpringBeanUtils.applicationContext = applicationContext;
     }
 
 

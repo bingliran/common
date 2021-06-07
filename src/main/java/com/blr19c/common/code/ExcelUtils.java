@@ -26,7 +26,7 @@ import java.util.UUID;
  *
  * @author blr
  */
-public class ExcelUtil {
+public class ExcelUtils {
 
     public static int defaultWidth = 15;//默认的单元格长度
     public static Charset defaultCharset = StandardCharsets.UTF_8;

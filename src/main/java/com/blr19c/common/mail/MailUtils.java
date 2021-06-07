@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
  *
  * @author blr
  */
-public class MailUtil {
+public class MailUtils {
     private static MultipleMailSender multipleMailSender;
 
     public static void setMultipleMailSender(MultipleMailSender multipleMailSender) {
-        MailUtil.multipleMailSender = multipleMailSender;
+        MailUtils.multipleMailSender = multipleMailSender;
     }
 
     /**

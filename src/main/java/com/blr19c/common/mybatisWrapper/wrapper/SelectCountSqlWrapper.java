@@ -1,4 +1,4 @@
-package com.blr19c.common.mybatisWrapper;
+package com.blr19c.common.mybatisWrapper.wrapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
@@ -26,22 +26,22 @@ public interface SelectCountSqlWrapper extends SqlWrapper {
         LambdaQueryWrapper<T> sqlWhere = sqlWhereFunction.apply(new LambdaQueryWrapper<>());
         return getSqlSessionTemplate().<Integer>selectOne(
                 getStatementId(SelectCountMethod.instance, modelClass),
-                PictogramMap.getInstance()
-                        .putValue(sqlWhere.getParamAlias(), sqlWhere)
-                        .getMap()
+                PictogramMap.getInstance(sqlWhere.getParamAlias(), sqlWhere)
         );
     }
 
-    class SelectCountMethod extends AbstractSelectMethod {
+    class SelectCountMethod extends AbstractWrapperMethod {
         static SelectCountMethod instance = new SelectCountMethod();
 
         @Override
-        public String getSql(TableInfo tableInfo) {
+        protected String getSql(TableInfo tableInfo) {
             return String.format(
                     SqlMethod.SELECT_COUNT.getSql(),
+                    sqlFirst(),
                     sqlCount(),
                     tableInfo.getTableName(),
-                    sqlWhereEntityWrapper(true, tableInfo)
+                    sqlWhereEntityWrapper(true, tableInfo),
+                    sqlComment()
             );
         }
     }

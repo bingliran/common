@@ -1,8 +1,14 @@
-package com.blr19c.common.mybatisWrapper;
+package com.blr19c.common.mybatisWrapper.wrapper;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.blr19c.common.collection.PictogramMap;
+import com.blr19c.common.mybatisWrapper.SqlMethod;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
+import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
@@ -10,6 +16,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -28,7 +35,7 @@ public interface InsertWrapper extends SqlWrapper {
      * @param modelClass 实体类class
      * @param modelList  新增的数据
      */
-    default <T> int insert(Class<T> modelClass, Object... modelList) {
+    default <T> int insert(Class<T> modelClass, Collection<Object> modelList) {
         initTypeHandler();
         String id = initMappedStatement(modelClass, InsertMethod.instance, Integer.class).getId();
         return getSqlSessionTemplate().insert(id, toSqlForeach(modelList));
@@ -41,11 +48,11 @@ public interface InsertWrapper extends SqlWrapper {
         }
     }
 
-    default Map<?, ?> toSqlForeach(Object object) {
-        return PictogramMap.getInstance().putValue("items", object).getMap();
+    default PictogramMap toSqlForeach(Collection<Object> collection) {
+        return PictogramMap.getInstance("collection", collection);
     }
 
-    class InsertMethod extends AbstractSelectMethod {
+    class InsertMethod extends AbstractWrapperMethod {
         static TypeHandlerRegistry typeHandlerRegistry;
         static Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap;
         static InsertMethod instance = new InsertMethod();
@@ -62,8 +69,20 @@ public interface InsertWrapper extends SqlWrapper {
         }
 
         @Override
-        public SqlCommandType getSqlCommandType() {
+        protected SqlCommandType getSqlCommandType(TableInfo tableInfo) {
             return SqlMethod.INSERT.getType();
+        }
+
+        @Override
+        protected KeyGenerator getKeyGenerator(TableInfo tableInfo) {
+            KeyGenerator keyGenerator = super.getKeyGenerator(tableInfo);
+            return StringUtils.isNotBlank(tableInfo.getKeyProperty()) ?
+                    (tableInfo.getIdType() == IdType.AUTO ?
+                            new Jdbc3KeyGenerator() :
+                            (tableInfo.getKeySequence() != null ?
+                                    TableInfoHelper.genKeyGenerator("insertBatch", tableInfo, builderAssistant) :
+                                    keyGenerator)
+                    ) : keyGenerator;
         }
 
         protected SqlMethod sqlMethod() {
@@ -71,9 +90,13 @@ public interface InsertWrapper extends SqlWrapper {
         }
 
         @Override
-        String getSql(TableInfo tableInfo) {
+        protected String getSql(TableInfo tableInfo) {
             StringJoiner field = new StringJoiner(",");
             StringJoiner value = new StringJoiner(",");
+            if (StringUtils.isNotBlank(tableInfo.getKeyProperty())) {
+                field.add(tableInfo.getKeyColumn());
+                value.add("#{item." + tableInfo.getKeyProperty() + "}");
+            }
             for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
                 field.add(tableFieldInfo.getColumn());
                 value.add("#{item." + tableFieldInfo.getProperty() + ",jdbcType=" + jdbcType(tableFieldInfo) + "}");
@@ -86,7 +109,7 @@ public interface InsertWrapper extends SqlWrapper {
             );
         }
 
-        JdbcType jdbcType(TableFieldInfo tableFieldInfo) {
+        protected JdbcType jdbcType(TableFieldInfo tableFieldInfo) {
             Map<JdbcType, TypeHandler<?>> jdbcTypeTypeHandlerMap = typeHandlerMap.get(tableFieldInfo.getPropertyType());
             if (jdbcTypeTypeHandlerMap == null)
                 return JdbcType.VARCHAR;

@@ -1,4 +1,4 @@
-package com.blr19c.common.mybatisWrapper;
+package com.blr19c.common.mybatisWrapper.wrapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.apache.ibatis.exceptions.TooManyResultsException;

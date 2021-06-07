@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 /**
  * 后操作任务
  */
-public class ScheduledTaskUtil {
+public class ScheduledTaskUtils {
 
     static ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
     static Map<String, CopyReschedulingRunnable> taskMap = new ConcurrentHashMap<>();

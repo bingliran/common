@@ -1,6 +1,6 @@
 package com.blr19c.common.mail.config;
 
-import com.blr19c.common.mail.MailUtil;
+import com.blr19c.common.mail.MailUtils;
 import com.blr19c.common.mail.MultipleMailSender;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,7 +20,7 @@ public class MailAutoConfig {
         for (MailProperties mailProperty : mailProperties) {
             multipleMailSender.addJavaMailSender(mailProperty);
         }
-        MailUtil.setMultipleMailSender(multipleMailSender);
+        MailUtils.setMultipleMailSender(multipleMailSender);
         return multipleMailSender;
     }
 }

@@ -1,4 +1,4 @@
-package com.blr19c.common.mybatisWrapper;
+package com.blr19c.common.mybatisWrapper.wrapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
@@ -29,9 +29,7 @@ public interface SelectListSqlWrapper extends SqlWrapper {
         LambdaQueryWrapper<T> sqlWhere = sqlWhereFunction.apply(new LambdaQueryWrapper<>());
         return getSqlSessionTemplate().selectList(
                 getStatementId(SelectListMethod.instance, modelClass),
-                PictogramMap.getInstance()
-                        .putValue(sqlWhere.getParamAlias(), sqlWhere)
-                        .getMap()
+                PictogramMap.getInstance(sqlWhere.getParamAlias(), sqlWhere)
         );
     }
 
@@ -48,15 +46,19 @@ public interface SelectListSqlWrapper extends SqlWrapper {
         return PageInfo.of(selectList(modelClass, sqlWhereFunction));
     }
 
-    class SelectListMethod extends AbstractSelectMethod {
+    class SelectListMethod extends AbstractWrapperMethod {
         static SelectListMethod instance = new SelectListMethod();
 
         @Override
-        public String getSql(TableInfo tableInfo) {
-            return String.format(SqlMethod.SELECT_LIST.getSql(),
+        protected String getSql(TableInfo tableInfo) {
+            return String.format(
+                    SqlMethod.SELECT_LIST.getSql(),
+                    sqlFirst(),
                     sqlSelectColumns(tableInfo, true),
                     tableInfo.getTableName(),
-                    sqlWhereEntityWrapper(true, tableInfo)
+                    sqlWhereEntityWrapper(true, tableInfo),
+                    sqlOrderBy(tableInfo),
+                    sqlComment()
             );
         }
     }

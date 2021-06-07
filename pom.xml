@@ -40,9 +40,11 @@
 
     <groupId>com.blr19c</groupId>
     <artifactId>common</artifactId>
-    <version>1.1.2</version>
+    <version>1.2.2</version>
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Commonly used tools for services include io, zip, timed tasks and other tools</description>
+    <description>The blr19c-common library contains utility classes, Map/Stream implementation, sending enterprise
+        WeChat, IP/ip address acquisition, mybatis-plus separation implementation, and so on.
+    </description>
     <url>https://github.com/bingliran/common</url>
 
     <properties>
@@ -62,7 +64,8 @@
         <jetbrains.annotations.version>17.0.0</jetbrains.annotations.version>
         <common.io.version>2.8.0</common.io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <google.guava>23.0</google.guava>
+        <google.guava.version>23.0</google.guava.version>
+        <org.jooq.version>0.9.14</org.jooq.version>
     </properties>
     <dependencies>
         <dependency>
@@ -125,7 +128,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${google.guava}</version>
+            <version>${google.guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -178,6 +181,11 @@
                     <artifactId>shedlock-core</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jool-java-8</artifactId>
+            <version>${org.jooq.version}</version>
         </dependency>
     </dependencies>
     <build>

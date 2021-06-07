@@ -15,7 +15,7 @@ import java.util.Objects;
  *
  * @author blr
  */
-public class AESUtil {
+public class AESUtils {
 
     private static final String KEY_ALGORITHM = "AES";
     private static final String DEFAULT_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";

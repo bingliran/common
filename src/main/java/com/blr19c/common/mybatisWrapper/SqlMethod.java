@@ -3,8 +3,8 @@ package com.blr19c.common.mybatisWrapper;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 public enum SqlMethod {
-    INSERT(SqlCommandType.INSERT, "insert into %s(%s) values <foreach collection=\"items\" item=\"item\" separator=\",\"> (%s) </foreach> </insert>"),
-    ORACLE_INSERT(SqlCommandType.INSERT, "<script> INSERT ALL <foreach collection=\"items\" item=\"item\" separator=\"\"> INTO %s(%s) VALUES(%s) </foreach> SELECT 1 FROM DUAL </script>");
+    INSERT(SqlCommandType.INSERT, "<script> insert into %s(%s) values <foreach collection=\"collection\" item=\"item\" separator=\",\"> (%s) </foreach> </insert> </script>"),
+    ORACLE_INSERT(SqlCommandType.INSERT, "<script> INSERT ALL <foreach collection=\"collection\" item=\"item\" separator=\"\"> INTO %s(%s) VALUES(%s) </foreach> SELECT 1 FROM DUAL </script>");
 
     private final SqlCommandType type;
     private final String sql;

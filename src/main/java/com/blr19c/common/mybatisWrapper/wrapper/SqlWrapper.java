@@ -1,11 +1,12 @@
-package com.blr19c.common.mybatisWrapper;
+package com.blr19c.common.mybatisWrapper.wrapper;
 
 import com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver;
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
-import com.blr19c.common.spring.SpringBeanUtil;
+import com.blr19c.common.spring.SpringBeanUtils;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -26,7 +27,7 @@ public interface SqlWrapper {
      * 初始化当前modelClass的模板
      */
     default MappedStatement initMappedStatement(Class<?> modelClass,
-                                                AbstractSelectMethod selectMethod,
+                                                AbstractWrapperMethod selectMethod,
                                                 Class<?> returnType) {
         String id = getStatementId(selectMethod, modelClass);
         Configuration configuration = SpbLazy.sqlSessionTemplate.getConfiguration();
@@ -48,7 +49,7 @@ public interface SqlWrapper {
         return getClassName(modelClass) + ".java (best guess)";
     }
 
-    default String getStatementId(AbstractSelectMethod selectMethod, Class<?> modelClass) {
+    default String getStatementId(AbstractWrapperMethod selectMethod, Class<?> modelClass) {
         return getResource(modelClass) + selectMethod.getClass().getSimpleName();
     }
 
@@ -56,15 +57,19 @@ public interface SqlWrapper {
         return SpbLazy.sqlSessionTemplate;
     }
 
-    abstract class AbstractSelectMethod extends AbstractMethod {
+    abstract class AbstractWrapperMethod extends AbstractMethod {
 
-        abstract String getSql(TableInfo tableInfo);
+        protected abstract String getSql(TableInfo tableInfo);
 
-        public SqlCommandType getSqlCommandType() {
+        protected SqlCommandType getSqlCommandType(TableInfo tableInfo) {
             return SqlCommandType.SELECT;
         }
 
-        public void init(MapperBuilderAssistant assistant) {
+        protected KeyGenerator getKeyGenerator(TableInfo tableInfo) {
+            return NoKeyGenerator.INSTANCE;
+        }
+
+        protected void init(MapperBuilderAssistant assistant) {
             if (this.languageDriver == null)
                 this.languageDriver = new MybatisXMLLanguageDriver();
             if (assistant != null) {
@@ -78,15 +83,17 @@ public interface SqlWrapper {
                                                    Class<?> modelClass,
                                                    TableInfo tableInfo,
                                                    Class<?> returnType) {
-            SqlCommandType sqlCommandType = Objects.requireNonNull(getSqlCommandType());
+            SqlCommandType sqlCommandType = Objects.requireNonNull(getSqlCommandType(tableInfo));
             init(assistant);
             SqlSource sqlSource = languageDriver.createSqlSource(assistant.getConfiguration(), getSql(tableInfo), modelClass);
             switch (sqlCommandType) {
                 case INSERT:
                     return this.addInsertMappedStatement(modelClass, modelClass, id, sqlSource,
-                            NoKeyGenerator.INSTANCE, tableInfo.getKeyProperty(), tableInfo.getKeyColumn());
+                            getKeyGenerator(tableInfo), tableInfo.getKeyProperty(), tableInfo.getKeyColumn());
                 case SELECT:
-                    return this.addSelectMappedStatementForTable(modelClass, id, sqlSource, tableInfo);
+                    return Objects.equals(modelClass, returnType) ?
+                            this.addSelectMappedStatementForTable(modelClass, id, sqlSource, tableInfo) :
+                            this.addSelectMappedStatementForOther(modelClass, id, sqlSource, returnType);
                 case DELETE:
                     return this.addDeleteMappedStatement(modelClass, id, sqlSource);
                 case UPDATE:
@@ -96,13 +103,13 @@ public interface SqlWrapper {
         }
 
         @Override
-        public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
+        public final MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
             throw new IllegalArgumentException("Does not provide this service");
         }
     }
 
 
     class SpbLazy {
-        static SqlSessionTemplate sqlSessionTemplate = SpringBeanUtil.getBean(SqlSessionTemplate.class);
+        static SqlSessionTemplate sqlSessionTemplate = SpringBeanUtils.getBean(SqlSessionTemplate.class);
     }
 }

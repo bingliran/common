@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 public class SpringAutoConfig {
 
     @Bean
-    public SpringBeanUtil springBeanUtil() {
-        return new SpringBeanUtil();
+    public SpringBeanUtils springBeanUtil() {
+        return new SpringBeanUtils();
     }
 }

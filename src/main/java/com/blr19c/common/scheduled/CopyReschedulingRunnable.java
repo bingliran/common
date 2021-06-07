@@ -1,5 +1,6 @@
 package com.blr19c.common.scheduled;
 
+import com.blr19c.common.code.ReflectionUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -95,22 +96,8 @@ public class CopyReschedulingRunnable implements ScheduledFuture<Object>, Runnab
         try {
             this.delegate.run();
         } catch (UndeclaredThrowableException ex) {
-            this.errorHandler.handleError(skipReflectionAnomaly(ex));
+            this.errorHandler.handleError(ReflectionUtils.skipReflectionAnomaly(ex));
         }
-    }
-
-    /**
-     * 跳过反射异常
-     */
-    private <T extends Throwable> Throwable skipReflectionAnomaly(T throwable) {
-        Throwable t = throwable;
-        while (t instanceof UndeclaredThrowableException)
-            t = ((UndeclaredThrowableException) t).getUndeclaredThrowable();
-        while (t instanceof ReflectiveOperationException)
-            t = t.getCause();
-        if (t instanceof UndeclaredThrowableException)
-            return skipReflectionAnomaly(t);
-        return t;
     }
 
     @Override

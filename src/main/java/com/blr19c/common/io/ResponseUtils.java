@@ -11,7 +11,7 @@ import java.net.URLEncoder;
 /**
  * 返回结果工具
  */
-public class ResponseUtil {
+public class ResponseUtils {
 
     /**
      * springboot 返回文件

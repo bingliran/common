@@ -25,7 +25,7 @@ import static org.springframework.web.reactive.function.BodyInserters.fromValue;
  *
  * @author blr
  */
-public class WebFluxUtil {
+public class WebFluxUtils {
 
     /**
      * @param url        请求url

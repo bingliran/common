@@ -14,7 +14,7 @@ import java.util.Objects;
  *
  * @author blr
  */
-public class MathOperationUtil {
+public class MathOperationUtils {
     public static final String ADDITION = "+";
     public static final String SUBTRACTION = "-";
     public static final String MULTIPLICATION = "*";
@@ -27,7 +27,7 @@ public class MathOperationUtil {
      *
      * @param roundingMode 除数处理
      * @param maths        运算字符
-     * @see MathOperationUtil#mathNormal(RoundingMode, Object...)
+     * @see MathOperationUtils#mathNormal(RoundingMode, Object...)
      */
     public static BigDecimal math(RoundingMode roundingMode, Object... maths) {
         return mathToArray(roundingMode, getArray(maths));

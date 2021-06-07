@@ -13,7 +13,7 @@ import java.util.zip.ZipOutputStream;
  *
  * @author blr
  */
-public class ZipUtil {
+public class ZipUtils {
 
     /**
      * 转换为zip
