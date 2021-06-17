@@ -1,10 +1,12 @@
 package com.blr19c.common.io;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+import org.apache.commons.io.IOUtils;
+
+import java.io.*;
 import java.util.List;
 import java.util.zip.CRC32;
+import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -22,38 +24,49 @@ public class ZipUtils {
      * @param method 压缩等级
      */
     public static byte[] toZip(List<Zip> zips, int method) throws IOException {
-        ByteArrayOutputStream fn;
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(fn = new ByteArrayOutputStream())) {
+        ByteOutputStream fn = new ByteOutputStream();
+        toZip(zips, method, fn);
+        return fn.getBytes();
+    }
+
+    /**
+     * 转换为zip
+     *
+     * @param zips   压缩数据
+     * @param method 压缩等级
+     * @param out    目标
+     */
+    public static void toZip(List<Zip> zips, int method, OutputStream out) throws IOException {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(new CheckedOutputStream(out, new CRC32()))) {
             zipOutputStream.setMethod(method);
             for (Zip zip : zips) {
                 ZipEntry zipEntry = new ZipEntry(zip.name);
-                zipEntry.setSize(zip.data.length);
-                CRC32 crc = new CRC32();
-                crc.update(zip.data);
-                zipEntry.setCrc(crc.getValue());
+                InputStream resource = zip.resource;
+                zipEntry.setSize(resource.available());
                 zipOutputStream.putNextEntry(zipEntry);
-                zipOutputStream.write(zip.data);
+                zipOutputStream.write(IOUtils.toByteArray(resource));
+                zip.close();
             }
             zipOutputStream.finish();
         }
-        return fn.toByteArray();
     }
 
-    public static class Zip {
+
+    public static class Zip implements Closeable {
 
         /**
          * 文件名称
          * 可以用{@link File#separator}分割作为前文件夹
          */
-        String name;
+        protected String name;
         /**
-         * 数据
+         * 文件资源
          */
-        byte[] data;
+        protected InputStream resource;
 
-        public Zip(String name, byte[] data) {
+        public Zip(String name, InputStream resource) {
             this.name = name;
-            this.data = data;
+            this.resource = resource;
         }
 
         public String getName() {
@@ -64,12 +77,25 @@ public class ZipUtils {
             this.name = name;
         }
 
-        public byte[] getData() {
-            return data;
+        public InputStream getResource() {
+            return resource;
         }
 
-        public void setData(byte[] data) {
-            this.data = data;
+        public void setResource(InputStream resource) {
+            this.resource = resource;
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (resource != null)
+                resource.close();
+        }
+    }
+
+    public static class ByteZip extends Zip {
+
+        public ByteZip(String name, byte[] data) {
+            super(name, new ByteArrayInputStream(data));
         }
     }
 }
