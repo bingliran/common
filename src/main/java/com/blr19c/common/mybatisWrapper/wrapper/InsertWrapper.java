@@ -99,7 +99,9 @@ public interface InsertWrapper extends SqlWrapper {
             }
             for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
                 field.add(tableFieldInfo.getColumn());
-                value.add("#{item." + tableFieldInfo.getProperty() + ",jdbcType=" + jdbcType(tableFieldInfo) + "}");
+                String jdbcType = StringUtils.isBlank(tableFieldInfo.getMapping()) ?
+                        "jdbcType=" + jdbcType(tableFieldInfo) : tableFieldInfo.getMapping();
+                value.add("#{item." + tableFieldInfo.getProperty() + "," + jdbcType + "}");
             }
             return String.format(
                     sqlMethod().getSql(),
