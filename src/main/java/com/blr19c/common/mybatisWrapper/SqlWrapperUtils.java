@@ -2,6 +2,7 @@ package com.blr19c.common.mybatisWrapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.blr19c.common.collection.PictogramMap;
 import com.blr19c.common.mybatisWrapper.wrapper.*;
 import com.blr19c.common.spring.SpringBeanUtils;
 import com.github.pagehelper.PageInfo;
@@ -24,30 +25,11 @@ import java.util.function.Function;
  */
 public class SqlWrapperUtils {
 
+    /**
+     * 计数查询
+     */
     public static <T> int count(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere) {
         return Wrapper.INSTANCE.selectCount(modelClass, l -> sqlWhere);
-    }
-
-    public static <T> List<T> list(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere) {
-        return Wrapper.INSTANCE.selectList(modelClass, l -> sqlWhere);
-    }
-
-    public static <T> PageInfo<T> list(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere,
-                                       int pageNum, int pageSize) {
-        return Wrapper.INSTANCE.selectListToPage(modelClass, l -> sqlWhere, pageNum, pageSize);
-    }
-
-    public static <T> T one(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere) {
-        return Wrapper.INSTANCE.selectOne(modelClass, l -> sqlWhere);
-    }
-
-    public static <T> int update(Class<T> modelClass,
-                                 LambdaUpdateWrapper<T> updateFunction) {
-        return Wrapper.INSTANCE.update(modelClass, l -> updateFunction);
-    }
-
-    public static <T> int delete(Class<T> modelClass, LambdaQueryWrapper<T> deleteFunction) {
-        return Wrapper.INSTANCE.delete(modelClass, l -> deleteFunction);
     }
 
     public static <T> int count(Class<T> modelClass,
@@ -55,9 +37,48 @@ public class SqlWrapperUtils {
         return Wrapper.INSTANCE.selectCount(modelClass, sqlWhereFunction);
     }
 
+    /**
+     * 单条查询
+     */
+    public static <T> T one(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere) {
+        return Wrapper.INSTANCE.selectOne(modelClass, l -> sqlWhere);
+    }
+
+    public static <T> T one(Class<T> modelClass,
+                            Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+        return Wrapper.INSTANCE.selectOne(modelClass, sqlWhereFunction);
+    }
+
+    /**
+     * 单条查询PictogramMap
+     */
+    public static <T> PictogramMap oneMap(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere) {
+        return Wrapper.INSTANCE.selectOneMap(modelClass, l -> sqlWhere);
+    }
+
+    public static <T> PictogramMap oneMap(Class<T> modelClass,
+                                          Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+        return Wrapper.INSTANCE.selectOneMap(modelClass, sqlWhereFunction);
+    }
+
+    /**
+     * 列表查询
+     */
+    public static <T> List<T> list(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere) {
+        return Wrapper.INSTANCE.selectList(modelClass, l -> sqlWhere);
+    }
+
     public static <T> List<T> list(Class<T> modelClass,
                                    Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
         return Wrapper.INSTANCE.selectList(modelClass, sqlWhereFunction);
+    }
+
+    /**
+     * 列表分页查询
+     */
+    public static <T> PageInfo<T> list(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere,
+                                       int pageNum, int pageSize) {
+        return Wrapper.INSTANCE.selectListToPage(modelClass, l -> sqlWhere, pageNum, pageSize);
     }
 
     public static <T> PageInfo<T> list(Class<T> modelClass,
@@ -66,9 +87,38 @@ public class SqlWrapperUtils {
         return Wrapper.INSTANCE.selectListToPage(modelClass, sqlWhereFunction, pageNum, pageSize);
     }
 
-    public static <T> T one(Class<T> modelClass,
-                            Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
-        return Wrapper.INSTANCE.selectOne(modelClass, sqlWhereFunction);
+    /**
+     * 列表PictogramMap查询
+     */
+    public static <T> List<PictogramMap> listMap(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere) {
+        return Wrapper.INSTANCE.selectListMap(modelClass, l -> sqlWhere);
+    }
+
+    public static <T> List<PictogramMap> listMap(Class<T> modelClass,
+                                                 Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+        return Wrapper.INSTANCE.selectListMap(modelClass, sqlWhereFunction);
+    }
+
+    /**
+     * 列表PictogramMap分页查询
+     */
+    public static <T> PageInfo<PictogramMap> listMap(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere,
+                                                     int pageNum, int pageSize) {
+        return Wrapper.INSTANCE.selectListMapToPage(modelClass, l -> sqlWhere, pageNum, pageSize);
+    }
+
+    public static <T> PageInfo<PictogramMap> listMap(Class<T> modelClass,
+                                                     Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction,
+                                                     int pageNum, int pageSize) {
+        return Wrapper.INSTANCE.selectListMapToPage(modelClass, sqlWhereFunction, pageNum, pageSize);
+    }
+
+    /**
+     * 修改
+     */
+    public static <T> int update(Class<T> modelClass,
+                                 LambdaUpdateWrapper<T> updateFunction) {
+        return Wrapper.INSTANCE.update(modelClass, l -> updateFunction);
     }
 
     public static <T> int update(Class<T> modelClass,
@@ -76,11 +126,21 @@ public class SqlWrapperUtils {
         return Wrapper.INSTANCE.update(modelClass, updateFunction);
     }
 
+    /**
+     * 删除
+     */
     public static <T> int delete(Class<T> modelClass,
                                  Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> deleteFunction) {
         return Wrapper.INSTANCE.delete(modelClass, deleteFunction);
     }
 
+    public static <T> int delete(Class<T> modelClass, LambdaQueryWrapper<T> deleteFunction) {
+        return Wrapper.INSTANCE.delete(modelClass, l -> deleteFunction);
+    }
+
+    /**
+     * 新增
+     */
     public static int insert(Collection<Object> modelList) {
         if (modelList == null || modelList.isEmpty())
             return 0;
@@ -100,31 +160,34 @@ public class SqlWrapperUtils {
     }
 
     static class Wrapper implements
-            SelectCountSqlWrapper, SelectListSqlWrapper, SelectOneSqlWrapper, UpdateWrapper, DeleteWrapper {
+            SelectCountSqlWrapper, SelectListSqlWrapper, SelectOneSqlWrapper, UpdateWrapper, DeleteWrapper,
+            SelectListMapSqlWrapper, SelectOneMapSqlWrapper {
         static final Wrapper INSTANCE = new Wrapper();
-        private static InsertWrapper INSERT_WRAPPER;
+        private static final InsertWrapper INSERT_WRAPPER;
 
         static {
             DataSource dataSource = SpringBeanUtils.getBean(SqlSessionTemplate.class).getSqlSessionFactory()
                     .getConfiguration().getEnvironment().getDataSource();
+            InsertWrapper insertWrapper;
             try {
                 DatabaseMetaData databaseMetaData = dataSource.getConnection().getMetaData();
                 String dataBaseType = databaseMetaData.getDatabaseProductName();
                 switch (dataBaseType.toLowerCase()) {
                     case "oracle":
-                        INSERT_WRAPPER = new OracleInsertWrapper() {
+                        insertWrapper = new OracleInsertWrapper() {
                         };
                         break;
                     case "mysql":
                     default:
-                        INSERT_WRAPPER = new InsertWrapper() {
+                        insertWrapper = new InsertWrapper() {
                         };
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                INSERT_WRAPPER = new InsertWrapper() {
+                insertWrapper = new InsertWrapper() {
                 };
             }
+            INSERT_WRAPPER = insertWrapper;
         }
 
         int insert(Class<?> modelClass, Collection<Object> modelList) {

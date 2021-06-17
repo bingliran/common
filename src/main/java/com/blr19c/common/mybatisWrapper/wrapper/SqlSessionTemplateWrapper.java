@@ -12,6 +12,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 
@@ -88,7 +89,20 @@ public class SqlSessionTemplateWrapper extends SqlSessionTemplate {
                         }
                     }
                 }
-                return method.invoke(sqlSession, args);
+                Object res = method.invoke(sqlSession, args);
+                if (res instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<Object> list = (List<Object>) res;
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i) instanceof EscapeMarkLinkedHashMap)
+                            list.set(i, ((EscapeMarkLinkedHashMap<?, ?>) list.get(i)).toPictogramMap());
+                    }
+                    return list;
+                }
+                if (res instanceof EscapeMarkLinkedHashMap) {
+                    return ((EscapeMarkLinkedHashMap<?, ?>) res).toPictogramMap();
+                }
+                return res;
             } catch (Exception e) {
                 throw ReflectionUtils.skipReflectionAnomaly(e);
             }
