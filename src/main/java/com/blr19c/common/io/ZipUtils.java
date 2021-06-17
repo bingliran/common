@@ -1,6 +1,5 @@
 package com.blr19c.common.io;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -24,9 +23,9 @@ public class ZipUtils {
      * @param method 压缩等级
      */
     public static byte[] toZip(List<Zip> zips, int method) throws IOException {
-        ByteOutputStream fn = new ByteOutputStream();
+        ByteArrayOutputStream fn = new ByteArrayOutputStream();
         toZip(zips, method, fn);
-        return fn.getBytes();
+        return fn.toByteArray();
     }
 
     /**
