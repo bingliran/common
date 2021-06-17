@@ -19,6 +19,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Blob;
 import java.sql.Clob;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,19 +116,19 @@ public class PictogramMap {
         return toPictogramMap(null, isSynchronized);
     }
 
-    @Override
-    /*
+    /**
      * 当map存在时比较map
      */
+    @Override
     public int hashCode() {
         if (isEmpty()) return super.hashCode();
         return getMap().hashCode();
     }
 
-    @Override
-    /*
+    /**
      * 相同的PictogramMap和相同的Map均视为相同
      */
+    @Override
     public boolean equals(Object obj) {
         if (Objects.isNull(obj)) return false;
         if (obj instanceof PictogramMap) {
@@ -136,6 +137,11 @@ public class PictogramMap {
         }
         if (obj instanceof Map) return Objects.equals(getMap(), obj);
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "{PictogramMap: " + this.getMap() + "}";
     }
 
     /**
@@ -309,6 +315,23 @@ public class PictogramMap {
     }
 
     /**
+     * 根据 keyFunction替换key
+     */
+    public <K> PictogramMap replaceKey(Function<K, Object> keyFunction) {
+        Iterator<Map.Entry<Object, Object>> iterator = this.entrySet().iterator();
+        PictogramMap newMap = getInstance();
+        while (iterator.hasNext()) {
+            Map.Entry<Object, Object> next = iterator.next();
+            Object apply = keyFunction.apply((K) next.getKey());
+            if (Objects.equals(apply, next.getKey()))
+                continue;
+            newMap.putValue(apply, next.getValue());
+            iterator.remove();
+        }
+        return this.putPictogramMap(newMap);
+    }
+
+    /**
      * 遍历元素
      */
     public <K, V> PictogramMap peek(Consumer<? super Map.Entry<K, V>> action) {
@@ -381,27 +404,27 @@ public class PictogramMap {
      * 向map中添加一个model
      */
     public PictogramMap putModel(Object model, Function<Map.Entry<?, ?>, Map.Entry<?, ?>> entryFunction) {
-        return putAll(toPictogramMapAsModel(model, entryFunction));
+        return putPictogramMap(toPictogramMapAsModel(model, entryFunction));
     }
 
     /**
      * 向map中添加一个model
      */
     public PictogramMap putModel(Object model) {
-        return putAll(toPictogramMapAsModel(model, e -> e));
+        return putPictogramMap(toPictogramMapAsModel(model, e -> e));
     }
 
     /**
      * 向map中添加一个pictogramMap
      */
-    public PictogramMap putAll(PictogramMap pictogramMap) {
-        return putAll(pictogramMap.getMap());
+    public PictogramMap putPictogramMap(PictogramMap pictogramMap) {
+        return putMap(pictogramMap.getMap());
     }
 
     /**
      * 向map中添加一个map
      */
-    public PictogramMap putAll(Map<?, ?> map) {
+    public PictogramMap putMap(Map<?, ?> map) {
         getMap().putAll(map);
         return this;
     }
@@ -648,6 +671,28 @@ public class PictogramMap {
      */
     public PictogramMap clobValueToString() {
         return replace(Unchecked.function(o -> o instanceof Clob ? IOUtils.toString(((Clob) o).getCharacterStream()) : o));
+    }
+
+    /**
+     * 将所有的blobValue转为byte[]
+     */
+    public PictogramMap blobValueToBytes() {
+        return replace(Unchecked.function(o -> o instanceof Blob ? ((Blob) o).getBytes(1, (int) ((Blob) o).length()) : o));
+    }
+
+    /**
+     * 字符串下划线key转驼峰格式
+     */
+    public PictogramMap underlineKeyToCamel() {
+        return replaceKey(k -> k instanceof String ? com.baomidou.mybatisplus.core.toolkit.StringUtils.underlineToCamel((String) k) : k);
+    }
+
+    /**
+     * 字符串驼峰key转下划线格式
+     */
+    public PictogramMap camelKeyToUnderline() {
+        return replaceKey(k -> k instanceof String && !com.baomidou.mybatisplus.core.toolkit.StringUtils.isCamel((String) k) ?
+                com.baomidou.mybatisplus.core.toolkit.StringUtils.camelToUnderline((String) k) : k);
     }
 
     /**
