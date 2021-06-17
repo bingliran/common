@@ -10,5 +10,5 @@
         <dependency>
             <groupId>com.blr19c</groupId>
             <artifactId>common</artifactId>
-            <version>1.2.2</version>
+            <version>1.3.3</version>
         </dependency>
