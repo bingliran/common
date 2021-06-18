@@ -1,6 +1,5 @@
 package com.blr19c.common.code;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -23,24 +22,28 @@ public class AESUtils {
     /**
      * AES 加密操作
      */
-    public static String encrypt(String content, String password) throws Exception {
-        Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
-        byte[] byteContent = content.getBytes(StandardCharsets.UTF_8);
-        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password));
-        return parseByte2HexStr(cipher.doFinal(byteContent));
+    public static String encrypt(String content, String password) {
+        try {
+            Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
+            byte[] byteContent = content.getBytes(StandardCharsets.UTF_8);
+            cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password));
+            return parseByte2HexStr(cipher.doFinal(byteContent));
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
      * AES 解密操作
      */
-    public static String decrypt(String content, String password) throws Exception {
+    public static String decrypt(String content, String password) {
         try {
             Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, getSecretKey(password));
             byte[] result = cipher.doFinal(Objects.requireNonNull(parseHexStr2Byte(content)));
             return new String(result, StandardCharsets.UTF_8);
-        } catch (BadPaddingException e) {
-            throw new BadPaddingException("密钥错误");
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
         }
     }
 

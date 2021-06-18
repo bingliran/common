@@ -97,7 +97,7 @@ public class MailUtils {
      */
     private static void doSend(String subject, String text, String[] to, Inline[] inlines, Attachment[] attachments) {
         if (to.length == 0)
-            throw new IllegalArgumentException("请设置接收人");
+            throw new IllegalArgumentException("Please set the recipient");
         try {
             JavaMailSender mailSender = multipleMailSender.getJavaMailSender(to[0]);
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -139,7 +139,7 @@ public class MailUtils {
 
                 @Override
                 public OutputStream getOutputStream() {
-                    throw new UnsupportedOperationException("只读资源");
+                    throw new UnsupportedOperationException("Read-only resource");
                 }
 
                 @Override
@@ -153,7 +153,7 @@ public class MailUtils {
                 }
             };
         }
-        throw new IllegalArgumentException("附件缺失文件");
+        throw new IllegalArgumentException("Attachment is missing file");
     }
 
 

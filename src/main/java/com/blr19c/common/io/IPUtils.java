@@ -1,6 +1,8 @@
 package com.blr19c.common.io;
 
 import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.AddressNotFoundException;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.City;
 import com.maxmind.geoip2.record.Country;
@@ -53,7 +55,7 @@ public class IPUtils {
     /**
      * 根据ip获取粗略地址
      */
-    public static String getAddress(String ip) {
+    public static String getAddress(String ip) throws GeoIp2Exception {
         final String asn = "zh-CN";
         try (DatabaseReader reader = new DatabaseReader.Builder(ResourceUtils.getFile("classpath:address/GeoLite2-City.mmdb")).build()) {
             InetAddress ipAddress = InetAddress.getByName(ip);
@@ -62,8 +64,10 @@ public class IPUtils {
             Subdivision subdivision = response.getMostSpecificSubdivision();
             City city = response.getCity();
             return country.getNames().get(asn) + subdivision.getNames().get(asn) + "-" + city.getNames().get(asn);
+        } catch (GeoIp2Exception e) {
+            throw e;
         } catch (Exception e) {
-            return "内网/本地";
+            throw new AddressNotFoundException("unknown", e);
         }
     }
 }

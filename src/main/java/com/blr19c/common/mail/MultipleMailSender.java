@@ -27,7 +27,7 @@ public class MultipleMailSender {
             primarySender = indexMailSender;
             return;
         }
-        throw new IllegalArgumentException("多个primarySender");
+        throw new IllegalArgumentException("Multiple primary servers");
     }
 
     public void addJavaMailSender(MailProperties mailProperties) {
@@ -53,7 +53,7 @@ public class MultipleMailSender {
         }
         if (primarySender != null)
             return primarySender.getJavaMailSender();
-        throw new IllegalArgumentException("没有能匹配" + to + "的邮件服务");
+        throw new IllegalArgumentException("There is no mail service that matches " + to);
     }
 
     static class IndexMailSender implements Comparator<IndexMailSender> {
@@ -132,7 +132,7 @@ public class MultipleMailSender {
                 }
                 super.doSend(mimeMessages, originalMessages);
             } catch (MessagingException e) {
-                throw new MailParseException(from + "不是地址", e);
+                throw new MailParseException(from + "is not an address", e);
             }
         }
     }
