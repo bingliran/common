@@ -11,6 +11,7 @@
         ``` 
             spring:
               multi-server-mail:
+                enable: true
                 mail:
                   - host: smtp.163.com
                     port: 25
