@@ -1,9 +1,9 @@
 package com.blr19c.common.mybatisWrapper.wrapper;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.baomidou.mybatisplus.core.toolkit.sql.SqlScriptUtils;
 import com.blr19c.common.collection.PictogramMap;
 import com.blr19c.common.mybatisWrapper.SqlMethod;
 import org.apache.commons.lang3.StringUtils;
@@ -18,8 +18,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
 
 
 /**
@@ -56,6 +54,7 @@ public interface InsertWrapper extends SqlWrapper {
         static TypeHandlerRegistry typeHandlerRegistry;
         static Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap;
         static InsertMethod instance = new InsertMethod();
+        static final String INSERT_PREFIX = SqlMethod.SQL_LIST_ITEM.getSql() + ".";
 
         @SuppressWarnings("unchecked")
         static void init() {
@@ -91,38 +90,16 @@ public interface InsertWrapper extends SqlWrapper {
 
         @Override
         protected String getSql(TableInfo tableInfo) {
-            StringJoiner field = new StringJoiner(",");
-            StringJoiner value = new StringJoiner(",");
-            if (StringUtils.isNotBlank(tableInfo.getKeyProperty())) {
-                field.add(tableInfo.getKeyColumn());
-                value.add("#{item." + tableInfo.getKeyProperty() + "}");
-            }
-            for (TableFieldInfo tableFieldInfo : tableInfo.getFieldList()) {
-                field.add(tableFieldInfo.getColumn());
-                String jdbcType = StringUtils.isBlank(tableFieldInfo.getMapping()) ?
-                        "jdbcType=" + jdbcType(tableFieldInfo) : tableFieldInfo.getMapping();
-                value.add("#{item." + tableFieldInfo.getProperty() + "," + jdbcType + "}");
-            }
+            String field = SqlScriptUtils.convertTrim(tableInfo.getAllInsertSqlColumnMaybeIf(INSERT_PREFIX),
+                    LEFT_BRACKET, RIGHT_BRACKET, null, COMMA);
+            String value = SqlScriptUtils.convertTrim(tableInfo.getAllInsertSqlPropertyMaybeIf(INSERT_PREFIX),
+                    LEFT_BRACKET, RIGHT_BRACKET, null, COMMA);
             return String.format(
                     sqlMethod().getSql(),
                     tableInfo.getTableName(),
-                    field.toString(),
-                    value.toString()
+                    field,
+                    value
             );
-        }
-
-        protected JdbcType jdbcType(TableFieldInfo tableFieldInfo) {
-            Map<JdbcType, TypeHandler<?>> jdbcTypeTypeHandlerMap = typeHandlerMap.get(tableFieldInfo.getPropertyType());
-            if (jdbcTypeTypeHandlerMap == null)
-                return JdbcType.VARCHAR;
-            Set<JdbcType> jdbcTypes = jdbcTypeTypeHandlerMap.keySet();
-            if (jdbcTypes.isEmpty())
-                return JdbcType.VARCHAR;
-            for (JdbcType type : jdbcTypes) {
-                if (type != null && type != JdbcType.NULL && type != JdbcType.OTHER && type != JdbcType.UNDEFINED)
-                    return type;
-            }
-            return JdbcType.VARCHAR;
         }
     }
 }
