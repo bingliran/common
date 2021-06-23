@@ -1,12 +1,8 @@
 package com.blr19c.common.io;
 
 import com.maxmind.geoip2.DatabaseReader;
-import com.maxmind.geoip2.exception.AddressNotFoundException;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
-import com.maxmind.geoip2.record.City;
-import com.maxmind.geoip2.record.Country;
-import com.maxmind.geoip2.record.Subdivision;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -55,19 +51,15 @@ public class IPUtils {
     /**
      * 根据ip获取粗略地址
      */
-    public static String getAddress(String ip) throws GeoIp2Exception {
-        final String asn = "zh-CN";
+    public static AddressInfo getAddress(String ip) throws GeoIp2Exception {
         try (DatabaseReader reader = new DatabaseReader.Builder(ResourceUtils.getFile("classpath:address/GeoLite2-City.mmdb")).build()) {
             InetAddress ipAddress = InetAddress.getByName(ip);
             CityResponse response = reader.city(ipAddress);
-            Country country = response.getCountry();
-            Subdivision subdivision = response.getMostSpecificSubdivision();
-            City city = response.getCity();
-            return country.getNames().get(asn) + subdivision.getNames().get(asn) + "-" + city.getNames().get(asn);
+            return new AddressInfo(response);
         } catch (GeoIp2Exception e) {
             throw e;
         } catch (Exception e) {
-            throw new AddressNotFoundException("unknown", e);
+            throw new GeoIp2Exception("unknown", e);
         }
     }
 }

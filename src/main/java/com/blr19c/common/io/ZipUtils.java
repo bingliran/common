@@ -2,7 +2,10 @@ package com.blr19c.common.io;
 
 import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
@@ -50,51 +53,4 @@ public class ZipUtils {
         }
     }
 
-
-    public static class Zip implements Closeable {
-
-        /**
-         * 文件名称
-         * 可以用{@link File#separator}分割作为前文件夹
-         */
-        protected String name;
-        /**
-         * 文件资源
-         */
-        protected InputStream resource;
-
-        public Zip(String name, InputStream resource) {
-            this.name = name;
-            this.resource = resource;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public InputStream getResource() {
-            return resource;
-        }
-
-        public void setResource(InputStream resource) {
-            this.resource = resource;
-        }
-
-        @Override
-        public void close() throws IOException {
-            if (resource != null)
-                resource.close();
-        }
-    }
-
-    public static class ByteZip extends Zip {
-
-        public ByteZip(String name, byte[] data) {
-            super(name, new ByteArrayInputStream(data));
-        }
-    }
 }
