@@ -64,7 +64,7 @@
         <jetbrains.annotations.version>17.0.0</jetbrains.annotations.version>
         <common.io.version>2.8.0</common.io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <google.guava.version>23.0</google.guava.version>
+        <google.guava.version>30.1.1-jre</google.guava.version>
         <org.jooq.version>0.9.14</org.jooq.version>
     </properties>
     <dependencies>
