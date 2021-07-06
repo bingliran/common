@@ -684,15 +684,16 @@ public class PictogramMap {
      * 字符串下划线key转驼峰格式
      */
     public PictogramMap underlineKeyToCamel() {
-        return replaceKey(k -> k instanceof String ? com.baomidou.mybatisplus.core.toolkit.StringUtils.underlineToCamel((String) k) : k);
+        return replaceKey(k -> k instanceof String && !com.baomidou.mybatisplus.core.toolkit.StringUtils.isCamel((String) k) ?
+                com.baomidou.mybatisplus.core.toolkit.StringUtils.underlineToCamel((String) k) : k);
     }
 
     /**
      * 字符串驼峰key转下划线格式
      */
     public PictogramMap camelKeyToUnderline() {
-        return replaceKey(k -> k instanceof String && !com.baomidou.mybatisplus.core.toolkit.StringUtils.isCamel((String) k) ?
-                com.baomidou.mybatisplus.core.toolkit.StringUtils.camelToUnderline((String) k) : k);
+        return replaceKey(k -> k instanceof String && com.baomidou.mybatisplus.core.toolkit.StringUtils.isCamel((String) k) ?
+                com.baomidou.mybatisplus.core.toolkit.StringUtils.camelToUnderline((String) k).toUpperCase() : k);
     }
 
     /**
