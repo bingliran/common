@@ -1,7 +1,9 @@
-package com.blr19c.common.mybatisWrapper.wrapper;
+package com.blr19c.common.mybatisWrapper.wrapper.select;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blr19c.common.collection.PictogramMap;
+import com.blr19c.common.mybatisWrapper.wrapper.EscapeMarkLinkedHashMap;
+import com.blr19c.common.mybatisWrapper.wrapper.SqlWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
@@ -23,7 +25,7 @@ public interface SelectListMapSqlWrapper extends SqlWrapper {
      */
     default <T> List<PictogramMap> selectListMap(Class<T> modelClass,
                                                  Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
-        initMappedStatement(modelClass, SelectListMapMethod.instance, EscapeMarkLinkedHashMap.class);
+        initMappedStatement(modelClass, EscapeMarkLinkedHashMap.class);
         LambdaQueryWrapper<T> sqlWhere = sqlWhereFunction.apply(new LambdaQueryWrapper<>());
         return getSqlSessionTemplate().selectList(
                 getStatementId(SelectListMapMethod.instance, modelClass),
@@ -42,6 +44,11 @@ public interface SelectListMapSqlWrapper extends SqlWrapper {
                                                            int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         return PageInfo.of(selectListMap(modelClass, sqlWhereFunction));
+    }
+
+    @Override
+    default AbstractWrapperMethod getWrapperMethod() {
+        return SelectListMapMethod.instance;
     }
 
     class SelectListMapMethod extends SelectListSqlWrapper.SelectListMethod {

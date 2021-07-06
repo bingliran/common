@@ -1,9 +1,10 @@
-package com.blr19c.common.mybatisWrapper.wrapper;
+package com.blr19c.common.mybatisWrapper.wrapper.select;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.blr19c.common.collection.PictogramMap;
+import com.blr19c.common.mybatisWrapper.wrapper.SqlWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
@@ -25,7 +26,7 @@ public interface SelectListSqlWrapper extends SqlWrapper {
      */
     default <T> List<T> selectList(Class<T> modelClass,
                                    Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
-        initMappedStatement(modelClass, SelectListMethod.instance, modelClass);
+        initMappedStatement(modelClass, modelClass);
         LambdaQueryWrapper<T> sqlWhere = sqlWhereFunction.apply(new LambdaQueryWrapper<>());
         return getSqlSessionTemplate().selectList(
                 getStatementId(SelectListMethod.instance, modelClass),
@@ -44,6 +45,11 @@ public interface SelectListSqlWrapper extends SqlWrapper {
                                              int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         return PageInfo.of(selectList(modelClass, sqlWhereFunction));
+    }
+
+    @Override
+    default AbstractWrapperMethod getWrapperMethod() {
+        return SelectListMethod.instance;
     }
 
     class SelectListMethod extends AbstractWrapperMethod {

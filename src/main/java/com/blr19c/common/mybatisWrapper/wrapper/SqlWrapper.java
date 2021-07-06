@@ -27,9 +27,17 @@ public interface SqlWrapper {
      * 初始化当前modelClass的模板
      */
     default MappedStatement initMappedStatement(Class<?> modelClass,
-                                                AbstractWrapperMethod selectMethod,
                                                 Class<?> returnType) {
-        String id = getStatementId(selectMethod, modelClass);
+        return initMappedStatement(getWrapperMethod(), modelClass, returnType);
+    }
+
+    /**
+     * 指定method的初始化当前modelClass的模板
+     */
+    default MappedStatement initMappedStatement(AbstractWrapperMethod method,
+                                                Class<?> modelClass,
+                                                Class<?> returnType) {
+        String id = getStatementId(method, modelClass);
         Configuration configuration = SpbLazy.sqlSessionTemplate.getConfiguration();
         if (configuration.hasStatement(id))
             return configuration.getMappedStatement(id);
@@ -38,37 +46,71 @@ public interface SqlWrapper {
         TableInfo tableInfo = TableInfoHelper.getTableInfo(modelClass);
         if (tableInfo == null)
             tableInfo = TableInfoHelper.initTableInfo(assistant, modelClass);
-        return selectMethod.initMappedStatement(assistant, id, modelClass, tableInfo, returnType);
+        return method.initMappedStatement(assistant, id, modelClass, tableInfo, returnType);
     }
 
+    /**
+     * 获取方法对应的实现
+     */
+    default AbstractWrapperMethod getWrapperMethod() {
+        throw new IllegalStateException("If you want to use 'initMappedStatement', please override this method");
+    }
+
+    /**
+     * 获取格式化className
+     */
     default String getClassName(Class<?> modelClass) {
         return modelClass.getName().replace('.', '/');
     }
 
+    /**
+     * 获取资源名称
+     */
     default String getResource(Class<?> modelClass) {
         return getClassName(modelClass) + ".java (best guess)";
     }
 
+    /**
+     * 获取modelClass对应方法啊的statementId
+     */
     default String getStatementId(AbstractWrapperMethod selectMethod, Class<?> modelClass) {
         return getResource(modelClass) + selectMethod.getClass().getSimpleName();
     }
 
+    /**
+     * 获取SqlSessionTemplate
+     */
     default SqlSessionTemplate getSqlSessionTemplate() {
         return SpbLazy.sqlSessionTemplate;
     }
 
+    /**
+     * 注册sql的抽象类
+     */
     abstract class AbstractWrapperMethod extends AbstractMethod {
 
+        /**
+         * 获取sql
+         */
         protected abstract String getSql(TableInfo tableInfo);
 
+        /**
+         * sql类型
+         */
         protected SqlCommandType getSqlCommandType(TableInfo tableInfo) {
             return SqlCommandType.SELECT;
         }
 
+        /**
+         * 主键生成器
+         */
         protected KeyGenerator getKeyGenerator(TableInfo tableInfo) {
             return NoKeyGenerator.INSTANCE;
         }
 
+        /**
+         * 初始化解析器
+         */
         protected void init(MapperBuilderAssistant assistant) {
             if (this.languageDriver == null)
                 this.languageDriver = new MybatisXMLLanguageDriver();
@@ -78,6 +120,9 @@ public interface SqlWrapper {
             }
         }
 
+        /**
+         * 初始化MappedStatement
+         */
         public MappedStatement initMappedStatement(MapperBuilderAssistant assistant,
                                                    String id,
                                                    Class<?> modelClass,
@@ -85,6 +130,7 @@ public interface SqlWrapper {
                                                    Class<?> returnType) {
             SqlCommandType sqlCommandType = Objects.requireNonNull(getSqlCommandType(tableInfo));
             init(assistant);
+            System.out.println(getSql(tableInfo));
             SqlSource sqlSource = languageDriver.createSqlSource(assistant.getConfiguration(), getSql(tableInfo), modelClass);
             switch (sqlCommandType) {
                 case INSERT:
