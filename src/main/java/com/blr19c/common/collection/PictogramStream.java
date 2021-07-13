@@ -12,7 +12,6 @@ import java.util.stream.*;
  *
  * @author blr
  */
-@SuppressWarnings("unused")
 public class PictogramStream<T> extends OriginalStream<T> {
 
     private PictogramStream(Stream<T> stream) {
@@ -145,7 +144,6 @@ public class PictogramStream<T> extends OriginalStream<T> {
     }
 }
 
-@SuppressWarnings("unused")
 class OriginalStream<T> implements BaseStream<T, OriginalStream<T>> {
     protected final Stream<T> stream;
 

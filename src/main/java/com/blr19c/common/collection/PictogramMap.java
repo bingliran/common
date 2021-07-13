@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.pagehelper.PageHelper;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
@@ -30,11 +31,12 @@ import java.util.stream.Collectors;
  * 将map转为更便于操作的象形map
  * 注: 使用时请格外注意泛型结构
  */
-@SuppressWarnings(value = {"unchecked", "unused"})
+@SuppressWarnings(value = {"unchecked"})
+@JsonSerialize(using = PictogramJsonSerialize.class)
 public class PictogramMap {
     private final Map<?, ?> data;
 
-    private PictogramMap(Map<?, ?> data, boolean isSynchronized) {
+    public PictogramMap(Map<?, ?> data, boolean isSynchronized) {
         this.data = isSynchronized ?
                 (data instanceof ConcurrentHashMap ? data :
                         Objects.isNull(data) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(data))
@@ -114,6 +116,13 @@ public class PictogramMap {
      */
     public static PictogramMap getInstance(boolean isSynchronized) {
         return toPictogramMap(null, isSynchronized);
+    }
+
+    /**
+     * 设置全局分页名称
+     */
+    public static void setGlobalPageName(String numName, String sizeName, boolean modifyLock) {
+        Page.setPage(numName, sizeName, modifyLock);
     }
 
     /**
@@ -536,6 +545,23 @@ public class PictogramMap {
     }
 
     /**
+     * 在pictogramMap向this pictogramMap 添加整组数据
+     */
+    public PictogramMap putValues(PictogramMap pictogramMap, Object... keys) {
+        if (keys == null || keys.length == 0)
+            return this;
+        PictogramStream.of(keys).forEach(key -> this.putValue(key, pictogramMap));
+        return this;
+    }
+
+    /**
+     * 在map向this pictogramMap 添加整组数据
+     */
+    public PictogramMap putValues(Map<?, ?> map, Object... keys) {
+        return putValues(toPictogramMap(map), keys);
+    }
+
+    /**
      * 原有值转为stringValue
      */
     public PictogramMap putValueToString(Object key) {
@@ -552,6 +578,7 @@ public class PictogramMap {
     /**
      * 从枚举中向map转换一组元素
      */
+    @Deprecated
     public <T extends Enum<T>> PictogramMap putValueToEnum(Object key, Class<? extends Enum<T>> cls) {
         return putValueToEnum(key, cls, "value");
     }
@@ -559,6 +586,7 @@ public class PictogramMap {
     /**
      * 从枚举中向map转换一组元素并指定方法名称
      */
+    @Deprecated
     public <T extends Enum<T>> PictogramMap putValueToEnum(Object key, Class<? extends Enum<T>> cls,
                                                            String methodName) {
         try {
@@ -638,14 +666,14 @@ public class PictogramMap {
      * 获取pageNum
      */
     public int getPageNum() {
-        return getIntValue("pageNum");
+        return getIntValue(Page.getPageNumName());
     }
 
     /**
      * 获取pageSize
      */
     public int getPageSize() {
-        return getIntValue("pageSize");
+        return getIntValue(Page.getPageSizeName());
     }
 
     /**
@@ -700,14 +728,14 @@ public class PictogramMap {
      * 删除分页
      */
     public PictogramMap removePage() {
-        return removeValue("pageNum", "pageSize");
+        return removeValue(Page.getPageNumName(), Page.getPageSizeName());
     }
 
     /**
      * 设置分页
      */
     public PictogramMap setPage(int pageNum, int pageSize) {
-        return putValue("pageNum", pageNum).putValue("pageSize", pageSize);
+        return putValue(Page.getPageNumName(), pageNum).putValue(Page.getPageSizeName(), pageSize);
     }
 
     /**
@@ -824,6 +852,34 @@ public class PictogramMap {
          */
         static ObjectMapper getObjectMapper(ObjectMapper objectMapper) {
             return objectMapper == null ? defaultObjectMapper : objectMapper;
+        }
+    }
+
+    /**
+     * 设置分页
+     */
+    static class Page {
+        static final String DEFAULT_PAGE_NUM_NAME = "pageNum";
+        static final String DEFAULT_PAGE_SIZE_NAME = "pageSize";
+        static String globalPageNumName = DEFAULT_PAGE_NUM_NAME;
+        static String globalPageSizeName = DEFAULT_PAGE_SIZE_NAME;
+        volatile static boolean modifyLock = false;
+
+        static synchronized void setPage(String numName, String sizeName, boolean ml) {
+            if (modifyLock) {
+                throw new IllegalStateException("Has been set as non editable!");
+            }
+            globalPageNumName = numName;
+            globalPageSizeName = sizeName;
+            modifyLock = ml;
+        }
+
+        static String getPageNumName() {
+            return globalPageNumName;
+        }
+
+        static String getPageSizeName() {
+            return globalPageSizeName;
         }
     }
 }
