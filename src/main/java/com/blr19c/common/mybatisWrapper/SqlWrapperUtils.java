@@ -1,5 +1,6 @@
 package com.blr19c.common.mybatisWrapper;
 
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.blr19c.common.collection.PictogramMap;
@@ -59,8 +60,9 @@ public class SqlWrapperUtils {
         return Wrapper.selectCountSqlWrapper.selectCount(modelClass, l -> sqlWhere);
     }
 
-    public static <T> int count(Class<T> modelClass,
-                                Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    int count(Class<T> modelClass,
+              Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         return Wrapper.selectCountSqlWrapper.selectCount(modelClass, sqlWhereFunction);
     }
 
@@ -71,8 +73,9 @@ public class SqlWrapperUtils {
         return Wrapper.selectOneSqlWrapper.selectOne(modelClass, l -> sqlWhere);
     }
 
-    public static <T> T one(Class<T> modelClass,
-                            Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    T one(Class<T> modelClass,
+          Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         return Wrapper.selectOneSqlWrapper.selectOne(modelClass, sqlWhereFunction);
     }
 
@@ -83,8 +86,9 @@ public class SqlWrapperUtils {
         return Wrapper.selectOneMapSqlWrapper.selectOneMap(modelClass, l -> sqlWhere);
     }
 
-    public static <T> PictogramMap oneMap(Class<T> modelClass,
-                                          Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    PictogramMap oneMap(Class<T> modelClass,
+                        Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         return Wrapper.selectOneMapSqlWrapper.selectOneMap(modelClass, sqlWhereFunction);
     }
 
@@ -95,8 +99,9 @@ public class SqlWrapperUtils {
         return Wrapper.selectListSqlWrapper.selectList(modelClass, l -> sqlWhere);
     }
 
-    public static <T> List<T> list(Class<T> modelClass,
-                                   Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    List<T> list(Class<T> modelClass,
+                 Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         return Wrapper.selectListSqlWrapper.selectList(modelClass, sqlWhereFunction);
     }
 
@@ -108,9 +113,10 @@ public class SqlWrapperUtils {
         return Wrapper.selectListSqlWrapper.selectListToPage(modelClass, l -> sqlWhere, pageNum, pageSize);
     }
 
-    public static <T> PageInfo<T> list(Class<T> modelClass,
-                                       Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction,
-                                       int pageNum, int pageSize) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    PageInfo<T> list(Class<T> modelClass,
+                     Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction,
+                     int pageNum, int pageSize) {
         return Wrapper.selectListSqlWrapper.selectListToPage(modelClass, sqlWhereFunction, pageNum, pageSize);
     }
 
@@ -121,22 +127,25 @@ public class SqlWrapperUtils {
         return Wrapper.selectListMapSqlWrapper.selectListMap(modelClass, l -> sqlWhere);
     }
 
-    public static <T> List<PictogramMap> listMap(Class<T> modelClass,
-                                                 Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    List<PictogramMap> listMap(Class<T> modelClass,
+                               Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         return Wrapper.selectListMapSqlWrapper.selectListMap(modelClass, sqlWhereFunction);
     }
 
     /**
      * 列表PictogramMap分页查询
      */
-    public static <T> PageInfo<PictogramMap> listMap(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere,
-                                                     int pageNum, int pageSize) {
+    public static <T>
+    PageInfo<PictogramMap> listMap(Class<T> modelClass, LambdaQueryWrapper<T> sqlWhere,
+                                   int pageNum, int pageSize) {
         return Wrapper.selectListMapSqlWrapper.selectListMapToPage(modelClass, l -> sqlWhere, pageNum, pageSize);
     }
 
-    public static <T> PageInfo<PictogramMap> listMap(Class<T> modelClass,
-                                                     Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction,
-                                                     int pageNum, int pageSize) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    PageInfo<PictogramMap> listMap(Class<T> modelClass,
+                                   Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction,
+                                   int pageNum, int pageSize) {
         return Wrapper.selectListMapSqlWrapper.selectListMapToPage(modelClass, sqlWhereFunction, pageNum, pageSize);
     }
 
@@ -166,8 +175,9 @@ public class SqlWrapperUtils {
     /**
      * 删除
      */
-    public static <T> int delete(Class<T> modelClass,
-                                 Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> deleteFunction) {
+    public static <T, R, C extends AbstractWrapper<T, R, C>>
+    int delete(Class<T> modelClass,
+               Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> deleteFunction) {
         return Wrapper.deleteWrapper.delete(modelClass, deleteFunction);
     }
 

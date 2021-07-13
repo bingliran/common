@@ -1,5 +1,6 @@
 package com.blr19c.common.mybatisWrapper.wrapper.select;
 
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 
@@ -19,7 +20,8 @@ public interface SelectOneSqlWrapper extends SelectListSqlWrapper {
      * @param modelClass       所依靠表的实体类
      * @param sqlWhereFunction 查询条件
      */
-    default <T> T selectOne(Class<T> modelClass, Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    default <T, R, C extends AbstractWrapper<T, R, C>>
+    T selectOne(Class<T> modelClass, Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         List<T> ts = selectList(modelClass, sqlWhereFunction);
         if (ts == null || ts.isEmpty())
             return null;

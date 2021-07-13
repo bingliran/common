@@ -1,5 +1,6 @@
 package com.blr19c.common.mybatisWrapper.wrapper.select;
 
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -21,10 +22,11 @@ public interface SelectCountSqlWrapper extends SqlWrapper {
      * @param modelClass       所依靠表的实体类
      * @param sqlWhereFunction 查询条件
      */
-    default <T> int selectCount(Class<T> modelClass,
-                                Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    default <T, R, C extends AbstractWrapper<T, R, C>>
+    int selectCount(Class<T> modelClass,
+                    Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         initMappedStatement(modelClass, Integer.class);
-        LambdaQueryWrapper<T> sqlWhere = sqlWhereFunction.apply(new LambdaQueryWrapper<>());
+        AbstractWrapper<T, R, C> sqlWhere = sqlWhereFunction.apply(new LambdaQueryWrapper<>());
         return getSqlSessionTemplate().<Integer>selectOne(
                 getStatementId(SelectCountMethod.instance, modelClass),
                 PictogramMap.getInstance(sqlWhere.getParamAlias(), sqlWhere)

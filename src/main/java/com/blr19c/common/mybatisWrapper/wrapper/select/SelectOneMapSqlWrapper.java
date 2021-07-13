@@ -1,5 +1,6 @@
 package com.blr19c.common.mybatisWrapper.wrapper.select;
 
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blr19c.common.collection.PictogramMap;
 import org.apache.ibatis.exceptions.TooManyResultsException;
@@ -20,7 +21,9 @@ public interface SelectOneMapSqlWrapper extends SelectListMapSqlWrapper {
      * @param modelClass       所依靠表的实体类
      * @param sqlWhereFunction 查询条件
      */
-    default <T> PictogramMap selectOneMap(Class<T> modelClass, Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlWhereFunction) {
+    default <T, R, C extends AbstractWrapper<T, R, C>>
+    PictogramMap selectOneMap(Class<T> modelClass,
+                              Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlWhereFunction) {
         List<PictogramMap> ts = selectListMap(modelClass, sqlWhereFunction);
         if (ts == null || ts.isEmpty())
             return null;

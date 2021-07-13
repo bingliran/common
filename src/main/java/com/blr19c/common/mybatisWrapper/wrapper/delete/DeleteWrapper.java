@@ -1,5 +1,6 @@
 package com.blr19c.common.mybatisWrapper.wrapper.delete;
 
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -22,10 +23,11 @@ public interface DeleteWrapper extends SqlWrapper {
      * @param modelClass       所依靠表的实体类
      * @param sqlQueryFunction 删除项
      */
-    default <T> int delete(Class<T> modelClass,
-                           Function<LambdaQueryWrapper<T>, LambdaQueryWrapper<T>> sqlQueryFunction) {
+    default <T, R, C extends AbstractWrapper<T, R, C>>
+    int delete(Class<T> modelClass,
+               Function<LambdaQueryWrapper<T>, AbstractWrapper<T, R, C>> sqlQueryFunction) {
         String id = initMappedStatement(modelClass, Integer.class).getId();
-        LambdaQueryWrapper<T> deleteFunction = sqlQueryFunction.apply(new LambdaQueryWrapper<>());
+        AbstractWrapper<T, R, C> deleteFunction = sqlQueryFunction.apply(new LambdaQueryWrapper<>());
         return getSqlSessionTemplate().delete(id, PictogramMap.getInstance(deleteFunction.getParamAlias(), deleteFunction));
     }
 
