@@ -62,7 +62,7 @@ public class SqlSessionTemplateWrapper extends SqlSessionTemplate {
                     return sqlSessionProxy((SqlSession) obj);
                 return obj;
             } catch (Exception e) {
-                throw ReflectionUtils.skipReflectionAnomaly(e);
+                throw ReflectionUtils.skipReflectionException(e);
             }
         }
     }
@@ -104,7 +104,7 @@ public class SqlSessionTemplateWrapper extends SqlSessionTemplate {
                 }
                 return res;
             } catch (Exception e) {
-                throw ReflectionUtils.skipReflectionAnomaly(e);
+                throw ReflectionUtils.skipReflectionException(e);
             }
         }
     }

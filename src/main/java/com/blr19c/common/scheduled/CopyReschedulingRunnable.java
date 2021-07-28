@@ -96,7 +96,7 @@ public class CopyReschedulingRunnable implements ScheduledFuture<Object>, Runnab
         try {
             this.delegate.run();
         } catch (UndeclaredThrowableException ex) {
-            this.errorHandler.handleError(ReflectionUtils.skipReflectionAnomaly(ex));
+            this.errorHandler.handleError(ReflectionUtils.skipReflectionException(ex));
         }
     }
 

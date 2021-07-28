@@ -1,6 +1,7 @@
 package com.blr19c.common.collection;
 
 
+import com.blr19c.common.code.ReflectionUtils;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -80,21 +81,50 @@ public class PictogramMap {
      * 将一个对象转为map 并设置 自定义转换
      */
     public static PictogramMap toPictogramMapAsModel(Object data, Function<Map.Entry<?, ?>, Map.Entry<?, ?>> entryFunction) {
-        try {
-            Class<?> c = data.getClass();
-            Field[] f = c.getDeclaredFields();
-            Map<Object, Object> map = new HashMap<>();
-            for (Field field : f) {
-                if (Modifier.isStatic(field.getModifiers()))
-                    continue;
-                field.setAccessible(true);
-                Map.Entry<?, ?> entry = entryFunction.apply(new AbstractMap.SimpleEntry<>(field.getName(), field.get(data)));
-                map.put(entry.getKey(), entry.getValue());
-            }
-            return toPictogramMap(map);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Serialization error", e);
+        return toPictogramMapAsModel(data, entryFunction, true, false);
+    }
+
+    /**
+     * 将一个对象转为map并设置自定义转换
+     *
+     * @param entryFunction  entry转换
+     * @param callSuperClass true包括父类
+     * @param useGetter      使用getter方法获取字段
+     */
+    public static PictogramMap toPictogramMapAsModel(Object data,
+                                                     Function<Map.Entry<?, ?>, Map.Entry<?, ?>> entryFunction,
+                                                     boolean callSuperClass,
+                                                     boolean useGetter) {
+        final PictogramMap pictogramMap = getInstance();
+        //使用get方法
+        if (useGetter) {
+            ReflectionUtils.doWithPropertyDescriptors(data.getClass(), null,
+                    p -> {
+                        Method readMethod = p.getReadMethod();
+                        ReflectionUtils.makeAccessible(readMethod);
+                        pictogramMap.putValue(p.getName(), ReflectionUtils.invokeMethod(readMethod, data));
+                    }, p -> {
+                        Method readMethod = p.getReadMethod();
+                        return readMethod != null &&
+                                !ReflectionUtils.isObjectMethod(readMethod) &&
+                                (callSuperClass || readMethod.getDeclaringClass() != data.getClass());
+                    }
+            );
+            return pictogramMap;
         }
+        //使用字段反射
+        ReflectionUtils.ReflectionCallback<Field> fieldCallback = field -> {
+            ReflectionUtils.makeAccessible(field);
+            Map.Entry<?, ?> entry = entryFunction.apply(new AbstractMap.SimpleEntry<>(field.getName(), field.get(data)));
+            pictogramMap.putValueToMap(entry);
+        };
+        ReflectionUtils.ReflectionFilter<Field> fieldFilter = field -> !Modifier.isStatic(field.getModifiers());
+        if (callSuperClass) {
+            ReflectionUtils.doWithFields(data.getClass(), fieldCallback, fieldFilter);
+        } else {
+            ReflectionUtils.doWithLocalFields(data.getClass(), fieldCallback, fieldFilter);
+        }
+        return pictogramMap;
     }
 
     /**
@@ -130,7 +160,6 @@ public class PictogramMap {
      */
     @Override
     public int hashCode() {
-        if (isEmpty()) return super.hashCode();
         return getMap().hashCode();
     }
 
@@ -362,6 +391,9 @@ public class PictogramMap {
         return PictogramStream.of(this.<K, Object>getMap().keySet());
     }
 
+    /**
+     * value流
+     */
     public <V> PictogramStream<V> valueStream() {
         return PictogramStream.of(this.<Object, V>getMap().values());
     }
@@ -420,7 +452,17 @@ public class PictogramMap {
      * 向map中添加一个model
      */
     public PictogramMap putModel(Object model) {
-        return putPictogramMap(toPictogramMapAsModel(model, e -> e));
+        return putModel(model, e -> e);
+    }
+
+    /**
+     * 向map中添加一个model
+     */
+    public PictogramMap putModel(Object model,
+                                 Function<Map.Entry<?, ?>, Map.Entry<?, ?>> entryFunction,
+                                 boolean callSuperClass,
+                                 boolean useGetter) {
+        return putPictogramMap(toPictogramMapAsModel(model, entryFunction, callSuperClass, useGetter));
     }
 
     /**
@@ -531,26 +573,12 @@ public class PictogramMap {
     }
 
     /**
-     * 从pictogramMap向map中添加一组元素
-     */
-    public PictogramMap putValue(Object key, PictogramMap pictogramMap) {
-        return putValue(key, (Object) pictogramMap.getObject(key));
-    }
-
-    /**
-     * 从map向map中添加一组元素
-     */
-    public PictogramMap putValue(Object key, Map<?, ?> map) {
-        return putValue(key, map.get(key));
-    }
-
-    /**
      * 在pictogramMap向this pictogramMap 添加整组数据
      */
     public PictogramMap putValues(PictogramMap pictogramMap, Object... keys) {
         if (keys == null || keys.length == 0)
             return this;
-        PictogramStream.of(keys).forEach(key -> this.putValue(key, pictogramMap));
+        PictogramStream.of(keys).forEach(key -> this.putValueToMap(key, pictogramMap));
         return this;
     }
 
@@ -613,8 +641,28 @@ public class PictogramMap {
      * 将key的value替换为thisKey的value
      */
     public PictogramMap putValueToThis(Object key, Object thisKey) {
-        return putValue(key, (Object) getObject(thisKey))
-                .removeValue(thisKey);
+        return putValue(key, getObject(thisKey)).removeValue(thisKey);
+    }
+
+    /**
+     * 从pictogramMap向map中添加一组元素
+     */
+    public PictogramMap putValueToMap(Object key, PictogramMap pictogramMap) {
+        return putValue(key, pictogramMap.getObject(key));
+    }
+
+    /**
+     * 从map向map中添加一组元素
+     */
+    public PictogramMap putValueToMap(Object key, Map<?, ?> map) {
+        return putValue(key, map.get(key));
+    }
+
+    /**
+     * 从Map.Entry向map中添加一组元素
+     */
+    public PictogramMap putValueToMap(Map.Entry<?, ?> entry) {
+        return putValue(entry.getKey(), entry.getValue());
     }
 
     /**
@@ -756,19 +804,57 @@ public class PictogramMap {
      * 转换为实体
      */
     public <T> T toModel(Class<T> cls, Recognizer<Map<Object, Object>, String, Object> recognizer) {
+        return toModel(cls, recognizer, true, true);
+    }
+
+
+    /**
+     * 转换为实体
+     */
+    public <T> T toModel(Class<T> cls,
+                         Recognizer<Map<Object, Object>, String, Object> recognizer,
+                         boolean callSuperClass,
+                         boolean useSetter) {
+        final T obj;
         try {
-            final Map<Object, Object> map = getMap();
-            T obj = cls.newInstance();
-            for (Field f : obj.getClass().getDeclaredFields()) {
-                if (Modifier.isStatic(f.getModifiers()) || Modifier.isFinal(f.getModifiers()))
-                    continue;
-                f.setAccessible(true);
-                f.set(obj, recognizer.test(map, f.getName()));
-            }
-            return obj;
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new IllegalArgumentException(e);
+            obj = cls.getConstructor().newInstance();
+        } catch (Exception e) {
+            ReflectionUtils.handleReflectionException(e);
+            throw new IllegalStateException("Should never get here");
         }
+        final Map<Object, Object> map = getMap();
+        //使用set方法
+        if (useSetter) {
+            ReflectionUtils.doWithPropertyDescriptors(cls, null,
+                    p -> {
+                        Method writeMethod = p.getWriteMethod();
+                        Class<?> propertyType = p.getPropertyType();
+                        ReflectionUtils.makeAccessible(writeMethod);
+                        Object value = recognizer.test(map, p.getName());
+                        ReflectionUtils.invokeMethod(writeMethod, obj, propertyType.cast(value));
+                    }, p -> {
+                        Method writeMethod = p.getWriteMethod();
+                        return writeMethod != null &&
+                                recognizer.test(map, p.getName()) != null &&
+                                !ReflectionUtils.isObjectMethod(writeMethod) &&
+                                (callSuperClass || writeMethod.getDeclaringClass() != cls);
+                    }
+            );
+            return obj;
+        }
+        //使用字段反射
+        ReflectionUtils.ReflectionFilter<Field> filter = f ->
+                !Modifier.isStatic(f.getModifiers()) && !Modifier.isFinal(f.getModifiers());
+        ReflectionUtils.ReflectionCallback<Field> callback = f -> {
+            f.setAccessible(true);
+            f.set(obj, recognizer.test(map, f.getName()));
+        };
+        if (callSuperClass) {
+            ReflectionUtils.doWithFields(cls, callback, filter);
+        } else {
+            ReflectionUtils.doWithLocalFields(cls, callback, filter);
+        }
+        return obj;
     }
 
     /**
@@ -781,7 +867,8 @@ public class PictogramMap {
     /**
      * 转为实体 json方式
      */
-    public <T> T toModel(TypeReference<T> cls, ObjectMapper objectMapper, Function<PictogramMap, Object> func) {
+    public <T> T
+    toModel(TypeReference<T> cls, ObjectMapper objectMapper, Function<PictogramMap, Object> func) {
         try {
             return Mapper.getObjectMapper(objectMapper).readValue(toJsonString(objectMapper, func), cls);
         } catch (JsonProcessingException e) {

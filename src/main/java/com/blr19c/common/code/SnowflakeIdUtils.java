@@ -12,6 +12,9 @@ public abstract class SnowflakeIdUtils {
         return DEFAULT_INSTANCE;
     }
 
+    /**
+     * Instant.ofEpochMilli(1623896691873L) 2021-06-17T02:24:51.873Z
+     */
     public static SnowflakeIdUtils getInstance(long workerId) {
         return new Snowflake(1623896691873L, workerId);
     }

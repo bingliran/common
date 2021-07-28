@@ -130,7 +130,6 @@ public interface SqlWrapper {
                                                    Class<?> returnType) {
             SqlCommandType sqlCommandType = Objects.requireNonNull(getSqlCommandType(tableInfo));
             init(assistant);
-            System.out.println(getSql(tableInfo));
             SqlSource sqlSource = languageDriver.createSqlSource(assistant.getConfiguration(), getSql(tableInfo), modelClass);
             switch (sqlCommandType) {
                 case INSERT:
