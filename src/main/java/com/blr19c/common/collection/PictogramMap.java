@@ -5,10 +5,11 @@ import com.blr19c.common.code.ReflectionUtils;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.pagehelper.PageHelper;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.lambda.Unchecked;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings(value = {"unchecked"})
 @JsonSerialize(using = PictogramJsonSerialize.class)
-public class PictogramMap {
+public class PictogramMap implements MapGetInterface, MapComputeInterface, MapPageInterface {
     private final Map<?, ?> data;
 
     public PictogramMap(Map<?, ?> data, boolean isSynchronized) {
@@ -185,105 +186,9 @@ public class PictogramMap {
     /**
      * 返回一个未经检查的map
      */
+    @Override
     public <K, V> Map<K, V> getMap() {
         return (Map<K, V>) data;
-    }
-
-    /**
-     * 校验map是否为空
-     */
-    public boolean isEmpty() {
-        return MapUtils.isEmpty(getMap());
-    }
-
-    /**
-     * 获取一个Integer类型的value
-     */
-    public Integer getInteger(Object key) {
-        return getInteger(key, null);
-    }
-
-    /**
-     * 获取一个Integer类型的value并存在默认值
-     */
-    public Integer getInteger(Object key, Integer defaultValue) {
-        if (Objects.isNull(key)) return defaultValue;
-        return MapUtils.getInteger(getMap(), key, defaultValue);
-    }
-
-    /**
-     * 获取一个int类型的value
-     */
-    public int getIntValue(Object key) {
-        return getIntValue(key, 0);
-    }
-
-    /**
-     * 获取一个int类型的value并存在默认值
-     */
-    public int getIntValue(Object key, int defaultValue) {
-        Integer value = getInteger(key, defaultValue);
-        return Objects.isNull(value) ? defaultValue : value;
-    }
-
-    /**
-     * 获取一个任意类型的value
-     */
-    public <T> T getObject(Object key) {
-        return getObject(key, null);
-    }
-
-    /**
-     * 获取一个任意类型的value并存在默认值
-     */
-    public <T> T getObject(Object key, T defaultValue) {
-        if (Objects.isNull(key)) return defaultValue;
-        return MapUtils.getObject(getMap(), key, defaultValue);
-    }
-
-    /**
-     * 获取一个String类型的value
-     */
-    public String getString(Object key) {
-        return getString(key, null);
-    }
-
-    /**
-     * 获取一个String类型的value并存在默认值
-     */
-    public String getString(Object key, String defaultValue) {
-        if (Objects.isNull(key)) return defaultValue;
-        return MapUtils.getString(getMap(), key, defaultValue);
-    }
-
-    /**
-     * 获取一个Double类型的value
-     */
-    public Double getDouble(Object key) {
-        return getDouble(key, null);
-    }
-
-    /**
-     * 获取一个Double类型的value并存在默认值
-     */
-    public Double getDouble(Object key, Double defaultValue) {
-        if (Objects.isNull(key)) return defaultValue;
-        return MapUtils.getDouble(getMap(), key, defaultValue);
-    }
-
-    /**
-     * 获取一个Long类型的value
-     */
-    public Long getLong(Object key) {
-        return getLong(key, null);
-    }
-
-    /**
-     * 获取一个Long类型的value并存在默认值
-     */
-    public Long getLong(Object key, Long defaultValue) {
-        if (Objects.isNull(key)) return defaultValue;
-        return MapUtils.getLong(getMap(), key, defaultValue);
     }
 
     /**
@@ -303,27 +208,6 @@ public class PictogramMap {
                 throw new IllegalArgumentException(errorMessage);
         }
         return this;
-    }
-
-    /**
-     * 是否包含指定key
-     */
-    public boolean containsKey(Object key) {
-        return getMap().containsKey(key);
-    }
-
-    /**
-     * 是否包含指定value
-     */
-    public boolean containsValue(Object value) {
-        return getMap().containsValue(value);
-    }
-
-    /**
-     * map size
-     */
-    public int size() {
-        return getMap().size();
     }
 
     /**
@@ -483,46 +367,6 @@ public class PictogramMap {
     /**
      * 如果不存在则put
      */
-    public <V> V putIfAbsent(Object key, V value) {
-        return this.<Object, V>getMap().putIfAbsent(key, value);
-    }
-
-    /**
-     * 计算是否存在
-     */
-    public <K, V> V computeIfPresent(K key,
-                                     BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        return this.<K, V>getMap().computeIfPresent(key, remappingFunction);
-    }
-
-    /**
-     * 计算是否不存在
-     */
-    public <K, V> V computeIfAbsent(K key,
-                                    Function<? super K, ? extends V> mappingFunction) {
-        return this.<K, V>getMap().computeIfAbsent(key, mappingFunction);
-    }
-
-
-    /**
-     * 根据旧value计算新value不存在则删除
-     */
-    public <K, V> V compute(K key,
-                            BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        return this.<K, V>getMap().compute(key, remappingFunction);
-    }
-
-    /**
-     * 合并
-     */
-    public <K, V> V merge(K key, V value,
-                          BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-        return this.<K, V>getMap().merge(key, value, remappingFunction);
-    }
-
-    /**
-     * 如果不存在则put
-     */
     public PictogramMap putIfAbsentToThis(Object key, Object value) {
         putIfAbsent(key, value);
         return this;
@@ -604,31 +448,6 @@ public class PictogramMap {
     }
 
     /**
-     * 从枚举中向map转换一组元素
-     */
-    @Deprecated
-    public <T extends Enum<T>> PictogramMap putValueToEnum(Object key, Class<? extends Enum<T>> cls) {
-        return putValueToEnum(key, cls, "value");
-    }
-
-    /**
-     * 从枚举中向map转换一组元素并指定方法名称
-     */
-    @Deprecated
-    public <T extends Enum<T>> PictogramMap putValueToEnum(Object key, Class<? extends Enum<T>> cls,
-                                                           String methodName) {
-        try {
-            Method method = cls.getMethod(methodName, String.class);
-            Object data = method.invoke(null, getString(key));
-            if (Objects.isNull(data)) return this;
-            return putValue(key, data.getClass().getMethod("getValue").invoke(data));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Failed to add element", e);
-        }
-    }
-
-    /**
      * 向map中添加一组元素且key,value不是null
      */
     public PictogramMap putValueNonNull(Object key, Object value) {
@@ -682,20 +501,6 @@ public class PictogramMap {
     }
 
     /**
-     * 比较两个map的value
-     */
-    public boolean equalsValue(Object key, Map<?, ?> map) {
-        return Objects.equals(map.get(key), getObject(key));
-    }
-
-    /**
-     * 比较getValue和value
-     */
-    public boolean equalsValue(Object key, Object value) {
-        return Objects.equals(value, getObject(key));
-    }
-
-    /**
      * 代码块执行
      */
     public <K, V> PictogramMap toCodeBlock(Consumer<Map<K, V>> consumer) {
@@ -708,38 +513,6 @@ public class PictogramMap {
      */
     public <V> Map<String, V> getStringKeyMap() {
         return getMap().entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> (V) e.getValue()));
-    }
-
-    /**
-     * 获取pageNum
-     */
-    public int getPageNum() {
-        return getIntValue(Page.getPageNumName());
-    }
-
-    /**
-     * 获取pageSize
-     */
-    public int getPageSize() {
-        return getIntValue(Page.getPageSizeName());
-    }
-
-    /**
-     * 默认使用PageHelper分页
-     */
-    public PictogramMap startPage() {
-        return startPage(PageHelper::startPage);
-    }
-
-    /**
-     * 分页
-     */
-    public PictogramMap startPage(BiConsumer<Integer, Integer> page) {
-        final int pageNum = getPageNum(), pageSize = getPageSize();
-        if (pageNum <= 0 || pageSize <= 0)
-            throw new IllegalArgumentException("pageSize and pageNum cannot be equal to or less than 0");
-        page.accept(pageNum, pageSize);
-        return this;
     }
 
     /**
@@ -787,17 +560,21 @@ public class PictogramMap {
     }
 
     /**
-     * 是否为空字符的key
+     * 默认使用PageHelper分页
      */
-    public boolean isBlank(Object key) {
-        return StringUtils.isBlank(getString(key));
+    public PictogramMap startPage() {
+        return startPage(PageHelper::startPage);
     }
 
     /**
-     * 是否为不是空字符的key
+     * 分页
      */
-    public boolean isNotBlank(Object key) {
-        return !isBlank(key);
+    public PictogramMap startPage(BiConsumer<Integer, Integer> page) {
+        final int pageNum = getPageNum(), pageSize = getPageSize();
+        if (pageNum <= 0 || pageSize <= 0)
+            throw new IllegalArgumentException("pageSize and pageNum cannot be equal to or less than 0");
+        page.accept(pageNum, pageSize);
+        return this;
     }
 
     /**
@@ -932,41 +709,22 @@ public class PictogramMap {
     }
 
     static class Mapper {
-        static ObjectMapper defaultObjectMapper = new ObjectMapper();
 
         /**
-         * 尽量使用自定义ObjectMapper defaultObjectMapper在多线程下响应速度会大幅降低
+         * 获取objectMapper
          */
         static ObjectMapper getObjectMapper(ObjectMapper objectMapper) {
-            return objectMapper == null ? defaultObjectMapper : objectMapper;
-        }
-    }
-
-    /**
-     * 设置分页
-     */
-    static class Page {
-        static final String DEFAULT_PAGE_NUM_NAME = "pageNum";
-        static final String DEFAULT_PAGE_SIZE_NAME = "pageSize";
-        static String globalPageNumName = DEFAULT_PAGE_NUM_NAME;
-        static String globalPageSizeName = DEFAULT_PAGE_SIZE_NAME;
-        volatile static boolean modifyLock = false;
-
-        static synchronized void setPage(String numName, String sizeName, boolean ml) {
-            if (modifyLock) {
-                throw new IllegalStateException("Has been set as non editable!");
-            }
-            globalPageNumName = numName;
-            globalPageSizeName = sizeName;
-            modifyLock = ml;
+            return objectMapper == null ? getObjectMapper() : objectMapper;
         }
 
-        static String getPageNumName() {
-            return globalPageNumName;
+        /**
+         * 默认的objectMapper会忽略未知字段和大小写
+         */
+        private static ObjectMapper getObjectMapper() {
+            return new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         }
 
-        static String getPageSizeName() {
-            return globalPageSizeName;
-        }
     }
 }

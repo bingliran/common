@@ -9,6 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -37,6 +38,25 @@ public class WebUtils {
      */
     public static HttpServletResponse response() {
         return servletRequestAttributes().getResponse();
+    }
+
+    /**
+     * 完整请求路径
+     */
+    public static String getRequestUrl(HttpServletRequest request) {
+        StringBuilder url = new StringBuilder();
+        url.append(request.getScheme()).append("://").append(request.getServerName());
+        url.append(":").append(request.getServerPort()).append(request.getRequestURI());
+        if (request.getQueryString() != null) url.append("?").append(request.getQueryString());
+        return url.toString();
+    }
+
+    /**
+     * springboot 返回文件
+     */
+    public static ResponseEntity<InputStreamResource> autoDownLoad(String attachmentName,
+                                                                   InputStream inputStream) throws IOException {
+        return autoDownLoad(attachmentName, inputStream.available(), inputStream);
     }
 
     /**
